@@ -9,14 +9,17 @@ from google.cloud import storage
 import os
 from dotenv import load_dotenv
 import uuid
+import json
 
 
 # .envファイルを読み込む
 load_dotenv()
 
 # Google Cloud Storageの設定
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-storage_client = storage.Client()
+gcp_credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+gcp_credentials = json.loads(gcp_credentials_json)
+storage_client = storage.Client.from_service_account_info(gcp_credentials)
+
 bucket_name = os.getenv("BUCKET_NAME")
 bucket = storage_client.bucket(bucket_name)
 
