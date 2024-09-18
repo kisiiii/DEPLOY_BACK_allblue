@@ -13,7 +13,7 @@ import json
 
 
 # .envファイルを読み込む
-load_dotenv()
+# load_dotenv()
 
 # Google Cloud Storageの設定
 gcp_credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -296,6 +296,49 @@ def get_user_points():
             "today_points": today_points,
             "total_points": total_points
         }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#すれ違いDB
+@app.route("/encounts", methods=['GET'])
+def get_encounts():
+    user_id = request.args.get('user_id')
+    encounts = crud.myselectAll(mymodels.Encounts, mymodels.Encounts.user_id == user_id)
+    partner_ids = [encount.partner_user_id for encount in encounts]
+    
+    dogs = crud.myselectAll(mymodels.Dogs, mymodels.Dogs.user_id.in_(partner_ids))
+    dog_data = [{'name': dog.dog_name, 'photo': dog.dog_photo} for dog in dogs]
+    
+    return jsonify(dog_data), 200
+
+
+# 現在地から近い犬情報取得
+@app.route('/nearby_dogs', methods=['GET'])
+def get_nearby_dogs():
+    user_id = request.args.get('user_id')
+    latitude = float(request.args.get('latitude'))
+    longitude = float(request.args.get('longitude'))
+
+    if not user_id:
+        return jsonify({"error": "user_id is required"}), 400
+
+    nearby_dogs = crud.get_nearby_dogs(user_id, latitude, longitude)
+    return jsonify(nearby_dogs), 200
+
+
+# 地図表示のためGPS履歴（フロント未実装）
+@app.route("/locations/history", methods=['GET'])
+def get_location_history():
+    user_id = request.args.get('user_id')
+    date_str = request.args.get('date')
+    
+    if not user_id or not date_str:
+        return jsonify({"error": "user_idとdateは必須です"}), 400
+
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        locations = crud.get_locations_by_date(user_id, date)
+        return jsonify(locations), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
