@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from math import radians, cos, sin, sqrt, atan2
 
 from db_control.connect import engine
-from db_control.mymodels import Users, Dogs, DogBooks, Locations, Encounts, EarnPoints, UsePoints
+from db_control.mymodels import Users, Dogs, DogBooks, Locations, Encounts, EarnPoints, UsePoints, RTLocations
 
 # 日本時間のタイムゾーン
 JST = timezone(timedelta(hours=9))
